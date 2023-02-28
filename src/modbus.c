@@ -24,11 +24,6 @@
 /* Internal use */
 #define MSG_LENGTH_UNDEFINED -1
 
-/* Exported version */
-const unsigned int libmodbus_version_major = LIBMODBUS_VERSION_MAJOR;
-const unsigned int libmodbus_version_minor = LIBMODBUS_VERSION_MINOR;
-const unsigned int libmodbus_version_micro = LIBMODBUS_VERSION_MICRO;
-
 /* Max between RTU and TCP max adu length (so TCP) */
 #define MAX_MESSAGE_LENGTH 260
 
@@ -1022,8 +1017,8 @@ int modbus_reply(modbus_t *ctx,
         /* Run indicator status to ON */
         rsp[rsp_length++] = 0xFF;
         /* LMB + length of LIBMODBUS_VERSION_STRING */
-        str_len = 3 + strlen(LIBMODBUS_VERSION_STRING);
-        memcpy(rsp + rsp_length, "LMB" LIBMODBUS_VERSION_STRING, str_len);
+        str_len = 3 + strlen("LIBMODBUS_VERSION_STRING");
+        memcpy(rsp + rsp_length, "LMB" "LIBMODBUS_VERSION_STRING", str_len);
         rsp_length += str_len;
         rsp[byte_count_pos] = rsp_length - byte_count_pos - 1;
     } break;
