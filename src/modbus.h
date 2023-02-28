@@ -19,19 +19,6 @@
 # include "stdint.h"
 #endif
 
-#include "modbus-version.h"
-
-#if defined(_MSC_VER)
-# if defined(DLLBUILD)
-/* define DLLBUILD when building the DLL */
-#  define MODBUS_API __declspec(dllexport)
-# else
-#  define MODBUS_API __declspec(dllimport)
-# endif
-#else
-# define MODBUS_API
-#endif
-
 #ifdef  __cplusplus
 # define MODBUS_BEGIN_DECLS  extern "C" {
 # define MODBUS_END_DECLS    }
@@ -150,10 +137,6 @@ enum {
 #define EMBMDATA    (EMBXGTAR + 5)
 #define EMBBADSLAVE (EMBXGTAR + 6)
 
-extern const unsigned int libmodbus_version_major;
-extern const unsigned int libmodbus_version_minor;
-extern const unsigned int libmodbus_version_micro;
-
 typedef struct _modbus modbus_t;
 
 typedef struct _modbus_mapping_t {
@@ -184,61 +167,62 @@ typedef enum {
     MODBUS_QUIRK_ALL = 0xFF
 } modbus_quirks;
 
-MODBUS_API int modbus_set_slave(modbus_t *ctx, int slave);
-MODBUS_API int modbus_get_slave(modbus_t *ctx);
-MODBUS_API int modbus_set_error_recovery(modbus_t *ctx,
-                                         modbus_error_recovery_mode error_recovery);
-MODBUS_API int modbus_set_socket(modbus_t *ctx, int s);
-MODBUS_API int modbus_get_socket(modbus_t *ctx);
+int modbus_set_slave(modbus_t *ctx, int slave);
+int modbus_get_slave(modbus_t *ctx);
+int modbus_set_error_recovery(modbus_t *ctx,
+                              modbus_error_recovery_mode error_recovery);
+int modbus_set_socket(modbus_t *ctx, int s);
+int modbus_get_socket(modbus_t *ctx);
 
-MODBUS_API int
+int
 modbus_get_response_timeout(modbus_t *ctx, uint32_t *to_sec, uint32_t *to_usec);
-MODBUS_API int
+int
 modbus_set_response_timeout(modbus_t *ctx, uint32_t to_sec, uint32_t to_usec);
 
-MODBUS_API int
+int
 modbus_get_byte_timeout(modbus_t *ctx, uint32_t *to_sec, uint32_t *to_usec);
-MODBUS_API int modbus_set_byte_timeout(modbus_t *ctx, uint32_t to_sec, uint32_t to_usec);
+int modbus_set_byte_timeout(modbus_t *ctx, uint32_t to_sec, uint32_t to_usec);
 
-MODBUS_API int
+int
 modbus_get_indication_timeout(modbus_t *ctx, uint32_t *to_sec, uint32_t *to_usec);
-MODBUS_API int
+int
 modbus_set_indication_timeout(modbus_t *ctx, uint32_t to_sec, uint32_t to_usec);
 
-MODBUS_API int modbus_get_header_length(modbus_t *ctx);
+int modbus_get_header_length(modbus_t *ctx);
 
-MODBUS_API int modbus_connect(modbus_t *ctx);
-MODBUS_API void modbus_close(modbus_t *ctx);
+int modbus_connect(modbus_t *ctx);
+void modbus_close(modbus_t *ctx);
 
-MODBUS_API void modbus_free(modbus_t *ctx);
+void modbus_free(modbus_t *ctx);
 
-MODBUS_API int modbus_flush(modbus_t *ctx);
-MODBUS_API int modbus_set_debug(modbus_t *ctx, int flag);
+int modbus_flush(modbus_t *ctx);
+int modbus_set_debug(modbus_t *ctx, int flag);
 
-MODBUS_API const char *modbus_strerror(int errnum);
+const char *modbus_strerror(int errnum);
 
-MODBUS_API int modbus_read_bits(modbus_t *ctx, int addr, int nb, uint8_t *dest);
-MODBUS_API int modbus_read_input_bits(modbus_t *ctx, int addr, int nb, uint8_t *dest);
-MODBUS_API int modbus_read_registers(modbus_t *ctx, int addr, int nb, uint16_t *dest);
-MODBUS_API int
+int modbus_read_bits(modbus_t *ctx, int addr, int nb, uint8_t *dest);
+int modbus_read_input_bits(modbus_t *ctx, int addr, int nb, uint8_t *dest);
+int modbus_read_registers(modbus_t *ctx, int addr, int nb, uint16_t *dest);
+int
 modbus_read_input_registers(modbus_t *ctx, int addr, int nb, uint16_t *dest);
-MODBUS_API int modbus_write_bit(modbus_t *ctx, int coil_addr, int status);
-MODBUS_API int modbus_write_register(modbus_t *ctx, int reg_addr, const uint16_t value);
-MODBUS_API int modbus_write_bits(modbus_t *ctx, int addr, int nb, const uint8_t *data);
-MODBUS_API int
+int modbus_write_bit(modbus_t *ctx, int coil_addr, int status);
+int modbus_write_register(modbus_t *ctx, int reg_addr, const uint16_t value);
+int modbus_write_bits(modbus_t *ctx, int addr, int nb, const uint8_t *data);
+int
 modbus_write_registers(modbus_t *ctx, int addr, int nb, const uint16_t *data);
-MODBUS_API int
-modbus_mask_write_register(modbus_t *ctx, int addr, uint16_t and_mask, uint16_t or_mask);
-MODBUS_API int modbus_write_and_read_registers(modbus_t *ctx,
+int
+modbus_mask_write_register(modbus_t *ctx, int addr, uint16_t and_mask,
+                           uint16_t or_mask);
+int modbus_write_and_read_registers(modbus_t *ctx,
                                                int write_addr,
                                                int write_nb,
                                                const uint16_t *src,
                                                int read_addr,
                                                int read_nb,
                                                uint16_t *dest);
-MODBUS_API int modbus_report_slave_id(modbus_t *ctx, int max_dest, uint8_t *dest);
+int modbus_report_slave_id(modbus_t *ctx, int max_dest, uint8_t *dest);
 
-MODBUS_API modbus_mapping_t *
+modbus_mapping_t *
 modbus_mapping_new_start_address(unsigned int start_bits,
                                  unsigned int nb_bits,
                                  unsigned int start_input_bits,
@@ -248,27 +232,27 @@ modbus_mapping_new_start_address(unsigned int start_bits,
                                  unsigned int start_input_registers,
                                  unsigned int nb_input_registers);
 
-MODBUS_API modbus_mapping_t *modbus_mapping_new(int nb_bits,
+modbus_mapping_t *modbus_mapping_new(int nb_bits,
                                                 int nb_input_bits,
                                                 int nb_registers,
                                                 int nb_input_registers);
-MODBUS_API void modbus_mapping_free(modbus_mapping_t *mb_mapping);
+void modbus_mapping_free(modbus_mapping_t *mb_mapping);
 
-MODBUS_API int
+int
 modbus_send_raw_request(modbus_t *ctx, const uint8_t *raw_req, int raw_req_length);
 
-MODBUS_API int modbus_receive(modbus_t *ctx, uint8_t *req);
+int modbus_receive(modbus_t *ctx, uint8_t *req);
 
-MODBUS_API int modbus_receive_confirmation(modbus_t *ctx, uint8_t *rsp);
+int modbus_receive_confirmation(modbus_t *ctx, uint8_t *rsp);
 
-MODBUS_API int modbus_reply(modbus_t *ctx,
+int modbus_reply(modbus_t *ctx,
                             const uint8_t *req,
                             int req_length,
                             modbus_mapping_t *mb_mapping);
-MODBUS_API int
+int
 modbus_reply_exception(modbus_t *ctx, const uint8_t *req, unsigned int exception_code);
-MODBUS_API int modbus_enable_quirks(modbus_t *ctx, unsigned int quirks_mask);
-MODBUS_API int modbus_disable_quirks(modbus_t *ctx, unsigned int quirks_mask);
+int modbus_enable_quirks(modbus_t *ctx, unsigned int quirks_mask);
+int modbus_disable_quirks(modbus_t *ctx, unsigned int quirks_mask);
 
 /**
  * UTILS FUNCTIONS
@@ -301,25 +285,25 @@ MODBUS_API int modbus_disable_quirks(modbus_t *ctx, unsigned int quirks_mask);
     ((int16_t *) (tab_int16))[(index) + 3] = (int16_t) (value);         \
   } while (0)
 
-MODBUS_API void modbus_set_bits_from_byte(uint8_t *dest, int idx, const uint8_t value);
-MODBUS_API void modbus_set_bits_from_bytes(uint8_t *dest,
+void modbus_set_bits_from_byte(uint8_t *dest, int idx, const uint8_t value);
+void modbus_set_bits_from_bytes(uint8_t *dest,
                                            int idx,
                                            unsigned int nb_bits,
                                            const uint8_t *tab_byte);
-MODBUS_API uint8_t modbus_get_byte_from_bits(const uint8_t *src,
+uint8_t modbus_get_byte_from_bits(const uint8_t *src,
                                              int idx,
                                              unsigned int nb_bits);
-MODBUS_API float modbus_get_float(const uint16_t *src);
-MODBUS_API float modbus_get_float_abcd(const uint16_t *src);
-MODBUS_API float modbus_get_float_dcba(const uint16_t *src);
-MODBUS_API float modbus_get_float_badc(const uint16_t *src);
-MODBUS_API float modbus_get_float_cdab(const uint16_t *src);
+float modbus_get_float(const uint16_t *src);
+float modbus_get_float_abcd(const uint16_t *src);
+float modbus_get_float_dcba(const uint16_t *src);
+float modbus_get_float_badc(const uint16_t *src);
+float modbus_get_float_cdab(const uint16_t *src);
 
-MODBUS_API void modbus_set_float(float f, uint16_t *dest);
-MODBUS_API void modbus_set_float_abcd(float f, uint16_t *dest);
-MODBUS_API void modbus_set_float_dcba(float f, uint16_t *dest);
-MODBUS_API void modbus_set_float_badc(float f, uint16_t *dest);
-MODBUS_API void modbus_set_float_cdab(float f, uint16_t *dest);
+void modbus_set_float(float f, uint16_t *dest);
+void modbus_set_float_abcd(float f, uint16_t *dest);
+void modbus_set_float_dcba(float f, uint16_t *dest);
+void modbus_set_float_badc(float f, uint16_t *dest);
+void modbus_set_float_cdab(float f, uint16_t *dest);
 
 #include "modbus-rtu.h"
 #include "modbus-tcp.h"
