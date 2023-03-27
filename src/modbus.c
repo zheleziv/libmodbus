@@ -168,47 +168,16 @@ static int send_msg(modbus_t *ctx, uint8_t *msg, int msg_length)
         printf("\n");
     }
 
-    /* In recovery mode, the write command will be issued until to be
-       successful! Disabled by default. */
-    do {
-        rc = ctx->backend->send(ctx, msg, msg_length);
-        if (rc == -1) {
-            _error_print(ctx, NULL);
-            if (ctx->error_recovery & MODBUS_ERROR_RECOVERY_LINK) {
 #ifdef _WIN32
-                const int wsa_err = WSAGetLastError();
-                if (wsa_err == WSAENETRESET || wsa_err == WSAENOTCONN ||
-                    wsa_err == WSAENOTSOCK || wsa_err == WSAESHUTDOWN ||
-                    wsa_err == WSAEHOSTUNREACH || wsa_err == WSAECONNABORTED ||
-                    wsa_err == WSAECONNRESET || wsa_err == WSAETIMEDOUT) {
-                    modbus_close(ctx);
-                    _sleep_response_timeout(ctx);
-                    modbus_connect(ctx);
-                } else {
-                    _sleep_response_timeout(ctx);
-                    modbus_flush(ctx);
-                }
+    rc = WSAGetLastError();
 #else
-                int saved_errno = errno;
-
-                if ((errno == EBADF || errno == ECONNRESET || errno == EPIPE)) {
-                    modbus_close(ctx);
-                    _sleep_response_timeout(ctx);
-                    modbus_connect(ctx);
-                } else {
-                    _sleep_response_timeout(ctx);
-                    modbus_flush(ctx);
-                }
-                errno = saved_errno;
+    rc = errno;
 #endif
-            }
-        }
-    } while ((ctx->error_recovery & MODBUS_ERROR_RECOVERY_LINK) && rc == -1);
-
-    if (rc > 0 && rc != msg_length) {
-        errno = EMBBADDATA;
-        return -1;
-    }
+}
+//    if (rc > 0 && rc != msg_length) {
+//        errno = EMBBADDATA;
+//        return -1;
+//    }
 
     return rc;
 }
@@ -1280,8 +1249,7 @@ static int read_registers(modbus_t *ctx, int function, int addr, int nb, uint16_
                     nb,
                     MODBUS_MAX_READ_REGISTERS);
         }
-        errno = EMBMDATA;
-        return -1;
+        return EMBMDATA;
     }
 
     req_length = ctx->backend->build_request_basis(ctx, function, addr, nb, req);
@@ -1293,11 +1261,11 @@ static int read_registers(modbus_t *ctx, int function, int addr, int nb, uint16_
 
         rc = _modbus_receive_msg(ctx, rsp, MSG_CONFIRMATION);
         if (rc == -1)
-            return -1;
+            return errno;
 
         rc = check_confirmation(ctx, req, rsp, rc);
         if (rc == -1)
-            return -1;
+            return errno;
 
         offset = ctx->backend->header_length;
 
@@ -1316,10 +1284,7 @@ int modbus_read_registers(modbus_t *ctx, int addr, int nb, uint16_t *dest)
 {
     int status;
 
-    if (ctx == NULL) {
-        errno = EINVAL;
-        return -1;
-    }
+    if (ctx == NULL)return EINVAL;
 
     if (nb > MODBUS_MAX_READ_REGISTERS) {
         if (ctx->debug) {
@@ -1328,8 +1293,7 @@ int modbus_read_registers(modbus_t *ctx, int addr, int nb, uint16_t *dest)
                     nb,
                     MODBUS_MAX_READ_REGISTERS);
         }
-        errno = EMBMDATA;
-        return -1;
+        return EMBMDATA;
     }
 
     status = read_registers(ctx, MODBUS_FC_READ_HOLDING_REGISTERS, addr, nb, dest);
